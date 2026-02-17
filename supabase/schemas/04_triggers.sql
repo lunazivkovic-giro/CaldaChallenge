@@ -1,6 +1,7 @@
 create or replace function public.log_item_changes()
 returns trigger
 language plpgsql
+set search_path = public, pg_temp
 as $$
 declare
   v_user uuid;

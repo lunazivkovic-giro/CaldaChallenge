@@ -1,11 +1,9 @@
+set check_function_bodies = off;
 
-create extension if not exists pg_cron with schema extensions;
-
-create or replace function public.archive_and_delete_old_orders()
-returns void
-language plpgsql
-set search_path = public, pg_temp
-as $$
+CREATE OR REPLACE FUNCTION public.archive_and_delete_old_orders()
+ RETURNS void
+ LANGUAGE plpgsql
+AS $function$
 declare
   v_count int := 0;
   v_sum numeric(12,2) := 0;
@@ -29,15 +27,7 @@ begin
   delete from public.orders o
   where o.created_at < now() - interval '7 days';
 end;
-$$;
+$function$
+;
 
-select
-  case
-    when exists (select 1 from cron.job where jobname = 'delete_old_orders_weekly_cleanup')
-      then null
-    else cron.schedule(
-      'delete_old_orders_weekly_cleanup',
-      '0 3 * * *',
-      $$select public.archive_and_delete_old_orders();$$
-    )
-  end;
+

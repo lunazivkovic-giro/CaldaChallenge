@@ -1,8 +1,10 @@
 create extension if not exists "uuid-ossp";
 
+-- automaticly updates updated_at
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql
+set search_path = public, pg_temp
 as $$
 begin
   new.updated_at = now();
@@ -10,7 +12,7 @@ begin
 end;
 $$;
 
--- PROFILES
+-- profiles
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   full_name text,
@@ -24,7 +26,7 @@ before update on public.profiles
 for each row
 execute function public.set_updated_at();
 
--- ITEMS
+-- items
 create table if not exists public.items (
   id uuid primary key default uuid_generate_v4(),
   name text not null,
@@ -41,7 +43,7 @@ before update on public.items
 for each row
 execute function public.set_updated_at();
 
--- ORDERS
+-- orders
 create table if not exists public.orders (
   id uuid primary key default uuid_generate_v4(),
   user_id uuid not null references public.profiles(id) on delete restrict, -- can't delete user if they still have orders
@@ -66,7 +68,7 @@ before update on public.orders
 for each row
 execute function public.set_updated_at();
 
--- ORDER_ITEMS
+-- order_items
 create table if not exists public.order_items (
   order_id uuid not null references public.orders(id) on delete cascade, -- if order is deleted, delete also order_item
   item_id uuid not null references public.items(id) on delete restrict, -- can't delete item if it's referenced in order_item
@@ -86,7 +88,7 @@ before update on public.order_items
 for each row
 execute function public.set_updated_at();
 
-
+-- item_history
 create table if not exists public.item_history (
   id uuid primary key default uuid_generate_v4(),
   item_id uuid not null references public.items(id) on delete cascade,
@@ -104,7 +106,7 @@ before update on public.item_history
 for each row
 execute function public.set_updated_at();
 
-
+--order_totals_archived
 create table if not exists public.order_totals_archive (
   id uuid primary key default uuid_generate_v4(),
   run_at timestamptz not null default now(),

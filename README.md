@@ -16,5 +16,5 @@ Supabase backend setup for a simple e-commerce app:
 
 ## Local setup
 
-### 1) Start Supabase
+### Start Supabase
     supabase start
